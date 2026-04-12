@@ -79,7 +79,7 @@ class MatchRecord {
     + moves: String
 }
 
-Ruleset <|.. StandardRules : реализует
+Ruleset <|.. StandardRules : реализует>>>
 Ruleset <|-- ReversedRules : расширяет
 
 Game *-- Ruleset : содержит правила
