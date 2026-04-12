@@ -1,0 +1,101 @@
+@startuml
+
+class Game {
+    - id: Int
+    - rules: Ruleset
+    - board: Board
+    - players: List<Player>
+    - currentPlayer: Player
+    + winner: Player
+    + blackScore: Int
+    + whiteScore: Int
+    + nextPlayer()
+    + makeMove(playerNumber: Int, x: Int, y: Int): Result
+}
+
+interface Ruleset {
+    + createBoard(): Board
+    + isValidMove(board: Board, x: Int, y: Int, playerColor: Int): Boolean
+    + applyMove(board: Board, x: Int, y: Int, playerColor: Int): Board
+    + isGameOver(board: Board): Boolean
+    + getWinner(board: Board): Int
+}
+
+class StandardRules {
+    + createBoard(): Board
+}
+
+class ReversedRules extends StandardRules {
+    + getWinner(board: Board): Int
+}
+
+class Board {
+    - cells: List<List<Int>>
+    + get(x: Int, y: Int): Int
+    + set(x: Int, y: Int, value: Int): Board
+    + count(playerColor: Int): Int
+    + isFull(): Boolean
+}
+
+enum CellValue {
+    EMPTY = 0
+    BLACK = 1
+    WHITE = 2
+}
+
+enum Result {
+    VALID
+    INVALID
+    GAME_OVER
+}
+
+class Player {
+    - id: Int
+    - name: String
+    - color: Int
+    + getColor(): Int
+}
+
+interface BoardDrawer {
+    + draw(board: Board)
+}
+
+class ConsoleBoardDrawer {
+    + draw(board: Board)
+}
+
+interface PlayerRepository {
+    + save(player: Player)
+    + findById(id: Int): Player
+}
+
+interface MatchRepository {
+    + save(match: MatchRecord)
+}
+
+class MatchRecord {
+    + id: Int
+    + winnerId: Int
+    + moves: String
+}
+
+Ruleset <|.. StandardRules : реализует
+Ruleset <|-- ReversedRules : расширяет
+
+Game *-- Ruleset : содержит правила
+Game *-- Board : владеет доской
+Game *-- Player : владеет игроками
+
+Ruleset --> Board : проверяет и меняет
+Board ..> CellValue : использует
+Result <.. Game : возвращает
+Game --> BoardDrawer : отображает
+BoardDrawer <|.. ConsoleBoardDrawer : реализует
+BoardDrawer --> Board : читает
+
+Game --> PlayerRepository : сохраняет статистику
+Game --> MatchRepository : сохраняет историю
+MatchRepository --> MatchRecord : порождает
+PlayerRepository --> Player : обновляет
+
+@enduml
