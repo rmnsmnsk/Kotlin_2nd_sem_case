@@ -21,20 +21,27 @@ interface Ruleset {
     + getWinner(board: Board): Int
 }
 
-class StandardRules {
+class ClassicRules {
     + createBoard(): Board
 }
 
-class ReversedRules extends StandardRules {
+class AntiReversiRules extends ClassicRules {
     + getWinner(board: Board): Int
 }
 
 class Board {
-    - cells: List<List<Int>>
-    + get(x: Int, y: Int): Int
-    + set(x: Int, y: Int, value: Int): Board
+    - cells: List<List<Cell>>
+    + get(x: Int, y: Int): Cell
+    + set(x: Int, y: Int, cell: Cell): Board
     + count(playerColor: Int): Int
     + isFull(): Boolean
+}
+
+class Cell {
+    - value: CellValue
+    - playerId: Int?
+    + isEmpty(): Boolean
+    + belongsTo(playerId: Int): Boolean
 }
 
 enum CellValue {
@@ -54,48 +61,62 @@ class Player {
     - name: String
     - color: Int
     + getColor(): Int
+    + getCellValue(): CellValue
 }
 
-interface BoardDrawer {
-    + draw(board: Board)
+interface BoardRenderer {
+    + render(board: Board)
 }
 
-class ConsoleBoardDrawer {
-    + draw(board: Board)
+class ConsoleBoardRenderer {
+    + render(board: Board)
 }
 
 interface PlayerRepository {
     + save(player: Player)
     + findById(id: Int): Player
+    + findAll(): List<Player>
 }
 
 interface MatchRepository {
-    + save(match: MatchRecord)
+    + save(gameRecord: GameRecord)
+    + findAll(): List<GameRecord>
 }
 
-class MatchRecord {
+class GameRecord {
     + id: Int
-    + winnerId: Int
+    + players: List<Int>
+    + winnerId: Int?
     + moves: String
+    + blackScore: Int
+    + whiteScore: Int
+    + date: String
 }
 
-Ruleset <|.. StandardRules : реализует>>>
-Ruleset <|-- ReversedRules : расширяет
+' Отношения
+Ruleset <|.. ClassicRules : implements
+Ruleset <|-- AntiReversiRules : extends
 
-Game *-- Ruleset : содержит правила
-Game *-- Board : владеет доской
-Game *-- Player : владеет игроками
+Game *-- Ruleset : contains rules
+Game *-- Board : owns board
+Game *-- Player : owns players
 
-Ruleset --> Board : проверяет и меняет
-Board ..> CellValue : использует
-Result <.. Game : возвращает
-Game --> BoardDrawer : отображает
-BoardDrawer <|.. ConsoleBoardDrawer : реализует
-BoardDrawer --> Board : читает
+Ruleset --> Board : validates and modifies
+Board *-- Cell : composed of cells
+Cell ..> CellValue : uses
+Cell ..> Player : references
+Player ..> CellValue : maps to
 
-Game --> PlayerRepository : сохраняет статистику
-Game --> MatchRepository : сохраняет историю
-MatchRepository --> MatchRecord : порождает
-PlayerRepository --> Player : обновляет
+Result <.. Game : returns
+Game --> BoardRenderer : renders via
+BoardRenderer <|.. ConsoleBoardRenderer : implements
+BoardRenderer --> Board : reads
+
+Game --> PlayerRepository : stores statistics
+Game --> MatchRepository : saves history
+Game ..> GameRecord : creates
+
+MatchRepository --> GameRecord : manages
+PlayerRepository --> Player : manages
 
 @enduml
