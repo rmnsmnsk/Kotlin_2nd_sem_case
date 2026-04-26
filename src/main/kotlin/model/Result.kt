@@ -2,7 +2,7 @@ package model
 
 enum class Result{
     VALID,
-    IVALID,
+    INVALID,
     GAME_OVER
 }
 

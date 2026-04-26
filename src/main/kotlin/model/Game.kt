@@ -1,5 +1,6 @@
-```kotlin
 package model
+
+import rules.Ruleset
 
 class Game(
     private val id: Int,

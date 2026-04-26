@@ -7,7 +7,7 @@ class MatchRepositoryImpl: MatchRepository{
     override fun save(gameRecord: GameRecord){
         matches.add(gameRecord)
     }
-    fun findAll(): List<GameRecord>{
+    override fun findAll(): List<GameRecord>{
         return matches.toList()
     }
 }

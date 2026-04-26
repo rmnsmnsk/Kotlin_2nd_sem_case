@@ -1,6 +1,6 @@
 package repository
 
-interface class MacthRepository{
+interface MatchRepository {
     fun save(gameRecord: GameRecord)
     fun findAll(): List<GameRecord>
 }

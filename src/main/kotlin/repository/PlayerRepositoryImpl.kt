@@ -11,7 +11,7 @@ class PlayerRepositoryImpl : PlayerRepository {
 
     override fun findById(id: Int): Player? {
         for (x in 0 until players.size) {
-            if (players[x].id == id) {
+            if (players[x].getId() == id) {
                 return players[x]
             }
         }

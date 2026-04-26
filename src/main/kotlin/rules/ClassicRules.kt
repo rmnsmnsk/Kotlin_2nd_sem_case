@@ -1,5 +1,4 @@
 package rules
-import kotlin.math.*
 
 import model.Board
 import model.Cell
@@ -39,18 +38,32 @@ class ClassicRules : Ruleset {
         var y = startY + dy
 
         if (x < 0 || x >= board.size || y < 0 || y >= board.size) return false
-        if (board.cells[x][y].isEmpty()) return false
-        if (board.cells[x][y].value != opponentColor) return false
+        if (board.get(x, y).isEmpty()) return false
+        if (board.get(x, y).value != opponentColor) return false
 
         x += dx
         y += dy
 
         while (x >= 0 && x < board.size && y >= 0 && y < board.size) {
-            if (board.cells[x][y].isEmpty()) return false
-            if (board.cells[x][y].value == myColor) return true
+            if (board.get(x, y).isEmpty()) return false
+            if (board.get(x, y).value == myColor) return true
             x += dx
             y += dy
         }
 
         return false
     }
+    //заглушки
+    override fun applyMove(board: Board, x: Int, y: Int, playerColor: Int): Board {
+        return board
+    }
+
+    override fun isGameOver(board: Board): Boolean {
+        return false
+    }
+
+    override fun getWinner(board: Board): Int {
+        return 0
+    }
+
+}
