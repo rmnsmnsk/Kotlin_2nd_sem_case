@@ -2,7 +2,7 @@ package model
 
 class Board(val size: Int){
 
-    private val cells: Array<Array<Cell>> = Array(size) {
+    internal val cells: Array<Array<Cell>> = Array(size) {
         Array(size) { Cell() }
     }
 
