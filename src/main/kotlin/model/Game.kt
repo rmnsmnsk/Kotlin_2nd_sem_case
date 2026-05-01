@@ -7,12 +7,17 @@ class Game(
     private val rules: Ruleset,
     private val players: List<Player>
 ) {
-    private var board: Board = rules.createBoard()
-    private var currentPlayer: Player = players[0]
+    var board: Board = rules.createBoard()
+        private set
+    var currentPlayer: Player = players[0]
+        private set
 
     var winner: Player? = null
+        private set
     var blackScore: Int = 0
+        private set
     var whiteScore: Int = 0
+        private set
 
     fun nextPlayer() {
         val index = players.indexOf(currentPlayer)

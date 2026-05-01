@@ -22,4 +22,8 @@ class Player(
             throw IllegalArgumentException("Invalid color: $color")
         }
     }
+
+    fun getName(): String {
+        return name
+    }
 }
