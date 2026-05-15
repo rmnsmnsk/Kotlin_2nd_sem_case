@@ -1,53 +1,35 @@
 package model
 
-class Board(val size: Int = 8) {
+data class Board(
+    private val cells: Array<Array<Cell>>
+) {
+    val size: Int = cells.size
 
-    internal val cells: Array<Array<Cell>> = Array(size) {
-        Array(size) { Cell() }
-    }
-
-    fun get(x: Int, y: Int): Cell {
-        if (x < 0 || x >= size || y < 0 || y >= size) {
-            throw IllegalArgumentException("Coordinates ($x, $y) out of bounds")
-        }
-        return cells[x][y]
-    }
+    fun get(x: Int, y: Int): Cell = cells[x][y]
 
     fun set(x: Int, y: Int, cell: Cell): Board {
-        if (x < 0 || x >= size || y < 0 || y >= size) {
-            throw IllegalArgumentException("Coordinates ($x, $y) out of bounds")
-        }
-        val newBoard = this.clone()
-        newBoard.cells[x][y] = cell
-        return newBoard
+        val newCells = Array(size) { i -> Array(size) { j -> cells[i][j] } }
+        newCells[x][y] = cell
+        return Board(newCells)
     }
 
-    fun count(playerColor: Int): Int {
-        if (playerColor < 0 || playerColor > 2) {
-            throw IllegalArgumentException()
-        }
+    fun count(color: Int): Int {
+        val targetValue = if (color == 1) CellValue.BLACK else CellValue.WHITE
         var count = 0
-        for (x in 0 until size) {
-            for (y in 0 until size) {
-                if (!cells[x][y].isEmpty() && cells[x][y].value.ordinal == playerColor) {
-                    count += 1
-                }
+        for (row in cells) {
+            for (cell in row) {
+                if (cell.value == targetValue) count++
             }
         }
         return count
     }
 
     fun isFull(): Boolean {
-        return count(0) == 0
-    }
-
-    private fun clone(): Board {
-        val newBoard = Board(size)
-        for (x in 0 until size) {
-            for (y in 0 until size) {
-                newBoard.cells[x][y] = this.cells[x][y]
+        for (row in cells) {
+            for (cell in row) {
+                if (cell.value == CellValue.EMPTY) return false
             }
         }
-        return newBoard
+        return true
     }
 }

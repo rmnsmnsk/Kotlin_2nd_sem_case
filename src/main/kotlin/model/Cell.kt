@@ -1,6 +1,6 @@
 package model
 
-class Cell(
+data class Cell(
     internal val value: CellValue = CellValue.EMPTY,
     internal val playerId: Int? = null
 ) {
