@@ -11,7 +11,6 @@ class Game(
         private set
     var currentPlayer: Player = players[0]
         private set
-
     var winner: Player? = null
         private set
     var blackScore: Int = 0
@@ -21,33 +20,28 @@ class Game(
 
     fun nextPlayer() {
         val index = players.indexOf(currentPlayer)
-        if (index == -1) {
-            throw IllegalStateException("Current player not found")
-        }
+        if (index == -1) throw IllegalStateException("Current player not found")
         currentPlayer = players[(index + 1) % players.size]
     }
 
     fun makeMove(playerNumber: Int, x: Int, y: Int): Result {
-        if (playerNumber != currentPlayer.getId()) {
-            return Result.INVALID
-        }
+        if (playerNumber != currentPlayer.id) return Result.INVALID
+        if (!rules.isValidMove(board, x, y, currentPlayer.color)) return Result.INVALID
 
-        if (!rules.isValidMove(board, x, y, currentPlayer.getColor())) {
-            return Result.INVALID
-        }
-
-        board = rules.applyMove(board, x, y, currentPlayer.getColor())
-
+        board = rules.applyMove(board, x, y, currentPlayer.color)
         blackScore = board.count(1)
         whiteScore = board.count(2)
 
         if (rules.isGameOver(board)) {
             val winnerColor = rules.getWinner(board)
-            winner = players.find { it.getColor() == winnerColor }
+            winner = players.find { it.color == winnerColor }
             return Result.GAME_OVER
         }
 
         nextPlayer()
         return Result.VALID
     }
+
+    fun getPlayers(): List<Player> = players
+    fun getId(): Int = id
 }

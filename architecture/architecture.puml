@@ -1,122 +1,190 @@
 @startuml
 
-class Game {
-    - id: Int
-    - rules: Ruleset
-    - board: Board
-    - players: List<Player>
-    - currentPlayer: Player
-    + winner: Player
-    + blackScore: Int
-    + whiteScore: Int
-    + nextPlayer()
-    + makeMove(playerNumber: Int, x: Int, y: Int): Result
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+title Othello Architecture - Swing GUI
+
+package "model" {
+    class Game {
+        - id: Int
+        - rules: Ruleset
+        - board: Board
+        - players: List<Player>
+        - currentPlayer: Player
+        + winner: Player?
+        + blackScore: Int
+        + whiteScore: Int
+        + makeMove(playerId: Int, x: Int, y: Int): Result
+        + getPlayers(): List<Player>
+        + getId(): Int
+    }
+
+    class Player {
+        + id: Int
+        + name: String
+        + color: Int
+        + wins: Int
+        + losses: Int
+        + gamesPlayed: Int
+        + withStats(wins, losses, gamesPlayed): Player
+    }
+
+    class Board {
+        - cells: Array<Array<Cell>>
+        + size: Int
+        + get(x: Int, y: Int): Cell
+        + set(x: Int, y: Int, cell: Cell): Board
+        + count(color: Int): Int
+        + isFull(): Boolean
+    }
+
+    class Cell {
+        + value: CellValue
+    }
+
+    enum CellValue {
+        EMPTY
+        BLACK
+        WHITE
+    }
+
+    enum Result {
+        VALID
+        INVALID
+        GAME_OVER
+    }
+
+    class GameRecord {
+        + id: Int
+        + playerIds: List<Int>
+        + winnerId: Int?
+        + moves: String
+        + blackScore: Int
+        + whiteScore: Int
+        + date: String
+    }
 }
 
-interface Ruleset {
-    + createBoard(): Board
-    + isValidMove(board: Board, x: Int, y: Int, playerColor: Int): Boolean
-    + applyMove(board: Board, x: Int, y: Int, playerColor: Int): Board
-    + isGameOver(board: Board): Boolean
-    + getWinner(board: Board): Int
+package "rules" {
+    interface Ruleset {
+        + createBoard(): Board
+        + isValidMove(board, x, y, color): Boolean
+        + applyMove(board, x, y, color): Board
+        + isGameOver(board): Boolean
+        + getWinner(board): Int
+    }
+
+    class ClassicRules {
+        + createBoard(): Board
+        + isValidMove(): Boolean
+        + applyMove(): Board
+        + isGameOver(): Boolean
+        + getWinner(): Int
+    }
+
+    class AntiReversiRules {
+        + getWinner(): Int
+    }
+
+    Ruleset <|.. ClassicRules
+    ClassicRules <|-- AntiReversiRules
 }
 
-class ClassicRules {
-    + createBoard(): Board
+package "repository" {
+    interface PlayerRepository {
+        + save(player: Player)
+        + findById(id: Int): Player?
+        + findAll(): List<Player>
+    }
+
+    interface MatchRepository {
+        + save(record: GameRecord)
+        + findAll(): List<GameRecord>
+    }
+
+    class JsonPlayerRepository {
+        - filePath: Path
+        + save(player: Player)
+        + findById(id: Int): Player?
+        + findAll(): List<Player>
+    }
+
+    class JsonMatchRepository {
+        - filePath: Path
+        + save(record: GameRecord)
+        + findAll(): List<GameRecord>
+    }
+
+    PlayerRepository <|.. JsonPlayerRepository
+    MatchRepository <|.. JsonMatchRepository
 }
 
-class AntiReversiRules extends ClassicRules {
-    + getWinner(board: Board): Int
+package "ui.swing" {
+    class OthelloSwingApp {
+        - playerRepo: PlayerRepository
+        - matchRepo: MatchRepository
+        - game: Game?
+        - boardPanel: BoardPanel?
+        - statusLabel: JLabel?
+        - timer: GameTimer?
+        + createAndShowGUI()
+        - handleMove(x: Int, y: Int)
+        - saveGameStats(g: Game)
+        - showRegistryDialog(parent: Component)
+    }
+
+    class BoardPanel {
+        - board: Board
+        - onCellClick: (Int, Int) -> Unit
+        + updateBoard(newBoard: Board)
+        + paintComponent(g: Graphics)
+    }
+
+    class GameTimer {
+        - seconds: Long
+        - running: Boolean
+        + start()
+        + stop()
+        + reset()
+        + getFormattedTime(): String
+        + setOnTick(listener: (Long) -> Unit)
+    }
 }
 
-class Board {
-    - cells: List<List<Cell>>
-    + get(x: Int, y: Int): Cell
-    + set(x: Int, y: Int, cell: Cell): Board
-    + count(playerColor: Int): Int
-    + isFull(): Boolean
+package "util" {
+    class JsonUtils {
+        + encodeToString(obj): String
+        + decodeFromString(json): T
+    }
 }
 
-class Cell {
-    - value: CellValue
-    - playerId: Int?
-    + isEmpty(): Boolean
-    + belongsTo(playerId: Int): Boolean
-}
+' Relationships
+Game *-- Ruleset : uses
+Game *-- Board : owns
+Game *-- Player : owns
+Board *-- Cell : contains
+Cell ..> CellValue : has
 
-enum CellValue {
-    EMPTY = 0
-    BLACK = 1
-    WHITE = 2
-}
+Ruleset ..> Board : creates/modifies
+ClassicRules ..> CellValue : uses
 
-enum Result {
-    VALID
-    INVALID
-    GAME_OVER
-}
+PlayerRepository ..> Player : persists
+MatchRepository ..> GameRecord : persists
+JsonPlayerRepository ..> JsonUtils : serializes
+JsonMatchRepository ..> JsonUtils : serializes
 
-class Player {
-    - id: Int
-    - name: String
-    - color: Int
-    + getColor(): Int
-    + getCellValue(): CellValue
-}
+OthelloSwingApp --> Game : controls
+OthelloSwingApp --> BoardPanel : displays
+OthelloSwingApp --> PlayerRepository : saves stats
+OthelloSwingApp --> MatchRepository : saves history
+OthelloSwingApp --> GameTimer : tracks time
 
-interface BoardRenderer {
-    + render(board: Board)
-}
+BoardPanel --> Board : renders
+BoardPanel ..> CellValue : draws
 
-class ConsoleBoardRenderer {
-    + render(board: Board)
-}
+GameTimer ..> OthelloSwingApp : notifies on tick
 
-interface PlayerRepository {
-    + save(player: Player)
-    + findById(id: Int): Player
-    + findAll(): List<Player>
-}
 
-interface MatchRepository {
-    + save(gameRecord: GameRecord)
-    + findAll(): List<GameRecord>
-}
-
-class GameRecord {
-    + id: Int
-    + players: List<Int>
-    + winnerId: Int?
-    + moves: String
-    + blackScore: Int
-    + whiteScore: Int
-    + date: String
-}
-
-' Отношения
-Ruleset <|.. ClassicRules : implements
-Ruleset <|-- AntiReversiRules : extends
-
-Game *-- Ruleset : contains rules
-Game *-- Board : owns board
-Game *-- Player : owns players
-
-Ruleset --> Board : validates and modifies
-Board *-- Cell : composed of cells
-Cell ..> CellValue : uses
-Cell ..> Player : references
-Player ..> CellValue : maps to
-
-Result <.. Game : returns
-Game --> BoardRenderer : renders via
-BoardRenderer <|.. ConsoleBoardRenderer : implements
-BoardRenderer --> Board : reads
-
-Game --> PlayerRepository : stores statistics
-Game --> MatchRepository : saves history
-Game ..> GameRecord : creates
-
-MatchRepository --> GameRecord : manages
-PlayerRepository --> Player : manages
 
 @enduml

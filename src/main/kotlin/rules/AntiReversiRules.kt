@@ -1,17 +1,16 @@
 package rules
 
 import model.Board
-import model.Player
+import model.CellValue
 
 class AntiReversiRules : ClassicRules() {
 
     override fun getWinner(board: Board): Int {
-        val blackCount = board.count(1)
-        val whiteCount = board.count(2)
-
+        val black = board.count(1)
+        val white = board.count(2)
         return when {
-            blackCount < whiteCount -> 1
-            whiteCount < blackCount -> 2
+            black < white -> 1
+            white < black -> 2
             else -> 0
         }
     }

@@ -1,29 +1,22 @@
 package model
 
-class Player(
-    internal val id: Int,
-    private val name: String,
-    private val color: Int
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Player(
+    val id: Int,
+    val name: String,
+    val color: Int,
+    val wins: Int = 0,
+    val losses: Int = 0,
+    val gamesPlayed: Int = 0
 ) {
-    fun getId(): Int {
-        return id
+    fun getCellValue(): model.CellValue = when (color) {
+        1 -> model.CellValue.BLACK
+        2 -> model.CellValue.WHITE
+        else -> throw IllegalArgumentException("Invalid color: $color")
     }
 
-    fun getColor(): Int {
-        return color
-    }
-
-    fun getCellValue(): CellValue {
-        if (color == 1) {
-            return CellValue.BLACK
-        } else if (color == 2) {
-            return CellValue.WHITE
-        } else {
-            throw IllegalArgumentException("Invalid color: $color")
-        }
-    }
-
-    fun getName(): String {
-        return name
-    }
+    fun withStats(wins: Int = this.wins, losses: Int = this.losses, gamesPlayed: Int = this.gamesPlayed): Player =
+        copy(wins = wins, losses = losses, gamesPlayed = gamesPlayed)
 }

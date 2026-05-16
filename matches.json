@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "playerIds": [
+            1,
+            2
+        ],
+        "winnerId": 1,
+        "moves": "",
+        "blackScore": 4,
+        "whiteScore": 1,
+        "date": "2026-05-16T01:46:01.852603510"
+    },
+    {
+        "id": 1,
+        "playerIds": [
+            1,
+            2
+        ],
+        "winnerId": 1,
+        "moves": "",
+        "blackScore": 6,
+        "whiteScore": 0,
+        "date": "2026-05-16T01:46:07.249950092"
+    },
+    {
+        "id": 1,
+        "playerIds": [
+            1,
+            2
+        ],
+        "winnerId": 1,
+        "moves": "",
+        "blackScore": 4,
+        "whiteScore": 1,
+        "date": "2026-05-16T01:46:42.322478023"
+    },
+    {
+        "id": 1,
+        "playerIds": [
+            1,
+            2
+        ],
+        "winnerId": 1,
+        "moves": "",
+        "blackScore": 4,
+        "whiteScore": 1,
+        "date": "2026-05-16T01:50:54.583458749"
+    },
+    {
+        "id": 1,
+        "playerIds": [
+            1,
+            2
+        ],
+        "winnerId": 1,
+        "moves": "",
+        "blackScore": 6,
+        "whiteScore": 0,
+        "date": "2026-05-16T01:50:57.217234802"
+    }
+]
